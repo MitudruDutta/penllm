@@ -1,0 +1,16 @@
+# Model blobs and Ollama binaries/archives — multi-GB, machine/USB specific.
+# These are created at runtime by the launcher; never commit them.
+Models/
+Ollama/
+*.gguf
+*.tar.zst
+*.tgz
+*.zip
+*.part
+
+# Local caches / OS cruft
+.cache/
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
