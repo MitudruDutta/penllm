@@ -39,8 +39,14 @@ timeout /t 1 >nul
 goto waitloop
 :ready
 
-echo Pulling !MODEL! ...
-"%~dp0Ollama\ollama.exe" pull !MODEL!
+rem only download if the model isn't already on the USB (avoids a slow re-verify)
+"%~dp0Ollama\ollama.exe" show !MODEL! >nul 2>&1
+if errorlevel 1 (
+  echo Pulling !MODEL! ...
+  "%~dp0Ollama\ollama.exe" pull !MODEL!
+) else (
+  echo !MODEL! is already on the USB - starting it.
+)
 "%~dp0Ollama\ollama.exe" run !MODEL!
 
 echo.

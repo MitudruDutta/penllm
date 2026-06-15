@@ -149,8 +149,14 @@ if [ -z "$MODEL" ]; then
   if [ -t 0 ]; then choose_model; else MODEL="$DEFAULT_MODEL"; fi
 fi
 
-echo "Pulling $MODEL ..."
-"$BIN" pull "$MODEL"
+# Only download if the model isn't already on the USB. Otherwise 'pull' contacts
+# the registry and re-hashes the whole multi-GB blob — slow, and needs internet.
+if "$BIN" show "$MODEL" >/dev/null 2>&1; then
+  echo "$MODEL is already on the USB — starting it."
+else
+  echo "Pulling $MODEL ..."
+  "$BIN" pull "$MODEL"
+fi
 
 "$BIN" run "$MODEL"
 

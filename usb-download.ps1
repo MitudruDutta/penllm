@@ -54,9 +54,15 @@ for ($i = 0; $i -lt 30; $i++) {
 if (-not $ready) { Write-Error "Ollama server did not become ready"; exit 1 }
 
 # Pull the model.
-Write-Host "Downloading $Model ..."
-& $OllamaExe pull $Model
-if ($LASTEXITCODE -ne 0) { Write-Error "Pull failed for $Model"; exit 1 }
+# Only download if the model isn't already on the USB (avoids a slow re-verify).
+& $OllamaExe show $Model *> $null
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "$Model is already on the USB — skipping download."
+} else {
+    Write-Host "Downloading $Model ..."
+    & $OllamaExe pull $Model
+    if ($LASTEXITCODE -ne 0) { Write-Error "Pull failed for $Model"; exit 1 }
+}
 
 Write-Host ""
 Write-Host "Done. Pulled model: $Model"
