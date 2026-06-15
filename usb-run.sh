@@ -37,6 +37,20 @@ CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/ollama-usb/$PLAT-$A"   # extracted binary
 mkdir -p "$MODELS" "$ARCDIR" "$CACHE"
 export OLLAMA_MODELS="$MODELS"
 
+# Run OUR server on a private port so we never collide with an Ollama already
+# running on this machine (the default :11434). Without this, our client calls
+# would hit the host's server and ignore OLLAMA_MODELS — pulling to the system
+# disk instead of the USB.
+port_free() {  # returns 0 (true) if nothing is listening on port $1
+  if   command -v ss >/dev/null 2>&1; then ! ss -ltn 2>/dev/null | grep -qE ":$1([^0-9]|$)"
+  elif command -v nc >/dev/null 2>&1; then ! nc -z 127.0.0.1 "$1" >/dev/null 2>&1
+  else return 0
+  fi
+}
+PORT=11435; ptries=0
+while ! port_free "$PORT"; do PORT=$((PORT + 1)); ptries=$((ptries + 1)); [ "$ptries" -ge 30 ] && break; done
+export OLLAMA_HOST="127.0.0.1:$PORT"
+
 if [ "$PLAT" = linux ]; then ANAME="ollama-linux-$A.tar.zst"; else ANAME="ollama-darwin.tgz"; fi
 ARCHIVE="$ARCDIR/$ANAME"
 BASE="https://github.com/ollama/ollama/releases/latest/download"

@@ -21,6 +21,9 @@ $Url  = "https://github.com/ollama/ollama/releases/latest/download/$Zip"
 
 New-Item -ItemType Directory -Force -Path $OllamaDir, $ModelsDir | Out-Null
 $env:OLLAMA_MODELS = $ModelsDir
+# Private port so we don't collide with an Ollama already running on this PC
+# (default :11434) — otherwise pulls go to the system disk instead of the USB.
+$env:OLLAMA_HOST = "127.0.0.1:11435"
 $OllamaExe = Join-Path $OllamaDir "ollama.exe"
 
 # Download the zip to the USB (once) and extract. Windows .exe/.dll have no

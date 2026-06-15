@@ -1,6 +1,9 @@
 @echo off
 setlocal enabledelayedexpansion
 set OLLAMA_MODELS=%~dp0Models
+rem Use a private port so we don't collide with any Ollama already running on
+rem this PC (default :11434) — otherwise pulls go to the system disk, not the USB.
+set OLLAMA_HOST=127.0.0.1:11435
 
 rem Model: use the argument if given, otherwise show a menu.
 if not "%~1"=="" ( set "MODEL=%~1" & goto serve )
