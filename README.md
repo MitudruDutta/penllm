@@ -41,20 +41,25 @@ sudo mkfs.exfat -n OLLAMA /dev/sdXN   # WIPES the partition — back up first
 
 ### Linux / macOS
 ```bash
-./usb-run.sh                 # default model: gemma4:12b
-./usb-run.sh gemma3:12b      # any other model
+./usb-run.sh                 # interactive menu — pick or type any model
+./usb-run.sh llama3.2:3b     # run a specific model directly
+./usb-run.sh --list          # list models already on the USB
 ```
 First run downloads the right Ollama binary onto the USB, starts the server,
 pulls the model, then opens a chat.
 
 ### Windows
 ```powershell
-powershell -ExecutionPolicy Bypass -File usb-download.ps1   # once, installs Ollama to USB + pulls model
-.\start.bat                                                 # thereafter: start.bat [model]
+powershell -ExecutionPolicy Bypass -File usb-download.ps1   # once: sets up Ollama on the USB + pulls a model
+.\start.bat                                                 # menu picker
+.\start.bat qwen2.5-coder:7b                                # a specific model
 ```
 
 ## Notes / fallbacks
 
+- **Use any model.** Run with no argument for a menu, or pass an Ollama library
+  name (`llama3.2:3b`, `qwen2.5-coder:7b`, `phi4`) or a HuggingFace GGUF
+  (`hf.co/<user>/<repo>:<quant>`). Set `OLLAMA_USB_MODEL` to change the default.
 - **`gemma4:12b` not on the Ollama registry yet?** `pull` will 404. Use a known
   base instead — `gemma3:12b` — or the GGUF build:
   `./usb-run.sh hf.co/yuxinlu1/gemma-4-12B-coder-fable5-composer2.5-v1-GGUF:Q4_K_M`

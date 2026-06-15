@@ -130,15 +130,19 @@ needed.
 
 ### Linux / macOS
 ```bash
-./usb-run.sh                 # default model
-./usb-run.sh gemma3:12b      # a different model
+./usb-run.sh                 # interactive menu — pick or type any model
+./usb-run.sh llama3.2:3b     # a specific model
+./usb-run.sh --list          # show models already on the USB
 ```
 
 ### Windows
 ```powershell
-.\start.bat
-.\start.bat gemma3:12b
+.\start.bat                  # menu picker
+.\start.bat gemma3:12b       # a specific model
 ```
+
+Any [Ollama library](https://ollama.com/library) name works, as does a
+HuggingFace GGUF repo: `hf.co/<user>/<repo>:<quant>`.
 
 ---
 

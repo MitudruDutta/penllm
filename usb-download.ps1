@@ -55,36 +55,8 @@ Write-Host "Downloading $Model ..."
 & $OllamaExe pull $Model
 if ($LASTEXITCODE -ne 0) { Write-Error "Pull failed for $Model"; exit 1 }
 
-# Write start.bat next to this script (%~dp0 makes it work wherever the USB mounts).
-$StartBat = @"
-@echo off
-setlocal
-set OLLAMA_MODELS=%~dp0Models
-
-if "%~1"=="" ( set "MODEL=$Model" ) else ( set "MODEL=%~1" )
-
-start "" "%~dp0Ollama\ollama.exe" serve
-
-rem wait until the server is ready (max ~30s)
-set /a tries=0
-:waitloop
-"%~dp0Ollama\ollama.exe" list >nul 2>&1
-if not errorlevel 1 goto ready
-set /a tries+=1
-if %tries% geq 30 ( echo Ollama server did not start & exit /b 1 )
-timeout /t 1 >nul
-goto waitloop
-:ready
-
-"%~dp0Ollama\ollama.exe" run %MODEL%
-
-echo.
-echo ^>^>^> Done. Use "Safely Remove Hardware" / Eject before unplugging the USB. ^<^<^<
-endlocal
-"@
-Set-Content -Path (Join-Path $Root "start.bat") -Value $StartBat -Encoding ASCII
-
 Write-Host ""
-Write-Host "Done. Default model: $Model"
-Write-Host "Run later with:  start.bat   (or  start.bat <model>)"
+Write-Host "Done. Pulled model: $Model"
+Write-Host "Run any time with:  start.bat            (shows a model menu)"
+Write-Host "                or:  start.bat <model>   (e.g. start.bat llama3.2:3b)"
 Write-Host "REMEMBER: Safely Remove / Eject the USB before unplugging."

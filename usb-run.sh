@@ -15,7 +15,9 @@
 set -eu
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
-MODEL="${1:-gemma4:12b}"
+# Model resolution: CLI arg > $OLLAMA_USB_MODEL env > interactive menu > default.
+MODEL="${1:-${OLLAMA_USB_MODEL:-}}"
+DEFAULT_MODEL="gemma4:12b"
 
 OS=$(uname -s); ARCH=$(uname -m)
 case "$OS" in
@@ -57,6 +59,32 @@ extract() {  # extract archive into the (already emptied) cache dir
   esac
 }
 
+choose_model() {  # interactive picker; sets MODEL. Needs the server running.
+  echo
+  echo "Models already on this USB:"
+  "$BIN" list 2>/dev/null | awk 'NR>1 && $1!="" {print "   " $1}'
+  echo
+  echo "Choose a model to download/run:"
+  echo "   1) gemma3:12b         general purpose (Google)"
+  echo "   2) llama3.2:3b        small & fast (Meta)"
+  echo "   3) qwen2.5-coder:7b   coding"
+  echo "   4) phi4:14b           reasoning (Microsoft)"
+  echo "   5) mistral:7b         general purpose"
+  echo "   6) $DEFAULT_MODEL         default"
+  echo "   7) custom — any Ollama name, or hf.co/<user>/<repo>:<quant>"
+  printf "Selection [6]: "
+  read -r sel
+  case "$sel" in
+    1) MODEL="gemma3:12b" ;;
+    2) MODEL="llama3.2:3b" ;;
+    3) MODEL="qwen2.5-coder:7b" ;;
+    4) MODEL="phi4:14b" ;;
+    5) MODEL="mistral:7b" ;;
+    7) printf "Enter model name: "; read -r MODEL ;;
+    *) MODEL="$DEFAULT_MODEL" ;;
+  esac
+}
+
 # 1. Make sure the archive is on the USB (downloaded once; reused on any machine).
 if [ ! -s "$ARCHIVE" ]; then
   echo "Downloading $ANAME to USB ..."
@@ -95,6 +123,17 @@ until "$BIN" list >/dev/null 2>&1; do
   if [ "$i" -ge 30 ]; then echo "Ollama server did not start" >&2; exit 1; fi
   sleep 1
 done
+
+# --list just shows what's installed and exits.
+if [ "$MODEL" = "--list" ] || [ "$MODEL" = "list" ]; then
+  "$BIN" list
+  exit 0
+fi
+
+# No model given? Ask (interactive), or fall back to the default if non-interactive.
+if [ -z "$MODEL" ]; then
+  if [ -t 0 ]; then choose_model; else MODEL="$DEFAULT_MODEL"; fi
+fi
 
 echo "Pulling $MODEL ..."
 "$BIN" pull "$MODEL"
